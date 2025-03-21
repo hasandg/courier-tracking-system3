@@ -29,9 +29,12 @@ java -jar store-service/target/store-service-0.0.1-SNAPSHOT.jar \
   --spring.data.redis.port=6379 \
   --spring.cloud.config.uri=http://localhost:8889 \
   --logging.config=store-service/src/main/resources/logback-nologstash.xml \
+  --logging.logstash.host=localhost \
+  --logging.logstash.enabled=false \
   --spring.profiles.active=dev \
   --spring.main.allow-bean-definition-overriding=true \
-  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration \
+  --spring.security.enabled=false \
+  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration \
   > logs/store-service.log 2>&1 &
 
 # Wait for Store Service to start
@@ -44,12 +47,15 @@ java -jar location-service/target/location-service-0.0.1-SNAPSHOT.jar \
   --spring.datasource.url=jdbc:postgresql://localhost:5432/courier_tracking \
   --spring.kafka.bootstrap-servers=localhost:19092,localhost:29092,localhost:39092 \
   --spring.cloud.config.uri=http://localhost:8889 \
+  --logging.config=location-service/src/main/resources/logback-nologstash.xml \
   --logging.logstash.host=localhost \
+  --logging.logstash.enabled=false \
   --spring.data.redis.host=localhost \
   --spring.data.redis.port=6379 \
   --spring.profiles.active=dev \
   --spring.main.allow-bean-definition-overriding=true \
-  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration \
+  --spring.security.enabled=false \
+  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration \
   > logs/location-service.log 2>&1 &
 
 # Wait for Location Service to start
@@ -65,9 +71,12 @@ java -jar distance-calculation-service/target/distance-calculation-service-0.0.1
   --spring.data.redis.port=6379 \
   --spring.cloud.config.uri=http://localhost:8889 \
   --logging.config=distance-calculation-service/src/main/resources/logback-nologstash.xml \
+  --logging.logstash.host=localhost \
+  --logging.logstash.enabled=false \
   --spring.profiles.active=dev \
   --spring.main.allow-bean-definition-overriding=true \
-  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration \
+  --spring.security.enabled=false \
+  --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration \
   > logs/distance-calculation-service.log 2>&1 &
 
 echo "All services started."

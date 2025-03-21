@@ -248,7 +248,7 @@ Restricts the number of calls within a time period:
 
 ## Getting Started
 
-This is second version of the project. This project contains the following changes:
+This is the third version of the project. This project contains the following changes:
 
 - Added Simple Spring Security to Api Gateway
 - Docker image size reduction from around 580 Mb to 120 Mb
@@ -268,7 +268,7 @@ You'll need:
 
 # Clone the repo
 
-git clone https://github.com/hasandg/courier-tracking-system2.git
+git clone https://github.com/hasandg/courier-tracking-system3.git
 
 #### Option 1: The Easy Way (Docker)
 
@@ -393,6 +393,12 @@ docker compose down -v
 
 Once everything is running, you can access the Swagger UI to explore the APIs:
 
+### Store Service
+
+```
+http://localhost:8082/swagger-ui.html
+```
+
 ### Distance Calculation Service
 
 ```
@@ -404,29 +410,6 @@ http://localhost:8083/swagger-ui.html
 ```
 http://localhost:8084/swagger-ui.html
 ```
-
-### Store Service
-
-```
-http://localhost:8082/swagger-ui.html
-```
-
-### API Gateway
-
-All services can also be accessed through the API Gateway:
-
-```
-http://localhost:8090/distance-calculation/swagger-ui.html
-http://localhost:8090/location/swagger-ui.html
-http://localhost:8090/store/swagger-ui.html
-```
-
-### Security
-
-The API Gateway is secured with Basic Authentication:
-
-- Username: admin
-- Password: admin
 
 ## Monitoring and Management
 
