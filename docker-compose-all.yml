@@ -128,7 +128,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - "6380:6379"
+      - "6379:6379"
     networks:
       - courier-tracking-system
 
@@ -139,7 +139,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: courier_tracking
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
