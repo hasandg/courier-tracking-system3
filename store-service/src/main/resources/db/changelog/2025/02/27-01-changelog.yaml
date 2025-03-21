@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: store-service-2025-02-27-01
+      author: hasandag
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: courier_locations
+      changes:
+        - createTable:
+            tableName: courier_locations
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: courier_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: latitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: courier_locations
+            indexName: idx_location_courier_id
+            columns:
+              - column:
+                  name: courier_id
+        - createIndex:
+            tableName: courier_locations
+            indexName: idx_location_timestamp
+            columns:
+              - column:
+                  name: timestamp

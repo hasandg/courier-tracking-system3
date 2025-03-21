@@ -1,0 +1,3 @@
+cluster.name: courier-tracking-elasticsearch
+discovery.type: single-node
+xpack.security.enabled: false

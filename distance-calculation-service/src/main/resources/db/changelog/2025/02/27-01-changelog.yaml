@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: analytics-service-2025-02-27-01
+      author: hasandag
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: courier_distances
+      changes:
+        - createTable:
+            tableName: courier_distances
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: courier_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_distance
+                  type: double precision
+                  defaultValueNumeric: 0.0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: segment_count
+                  type: integer
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: courier_distances
+            columnNames: courier_id, date
+            constraintName: uk_courier_distance_date
+        - createIndex:
+            tableName: courier_distances
+            indexName: idx_courier_distance_courier_id
+            columns:
+              - column:
+                  name: courier_id
+        - createIndex:
+            tableName: courier_distances
+            indexName: idx_courier_distance_date
+            columns:
+              - column:
+                  name: date

@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: store-service-2025-02-28-01
+      author: hasandag
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: stores
+      changes:
+        - createTable:
+            tableName: stores
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: latitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: store-service-2025-02-28-02
+      author: hasandag
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: stores
+      changes:
+        - loadData:
+            tableName: stores
+            file: stores.csv
+            separator: ','
+            columns:
+              - column:
+                  name: name
+                  type: STRING
+              - column:
+                  name: latitude
+                  type: NUMERIC
+              - column:
+                  name: longitude
+                  type: NUMERIC

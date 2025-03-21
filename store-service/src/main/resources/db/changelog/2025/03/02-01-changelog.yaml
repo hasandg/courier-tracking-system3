@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: store-service-2025-03-02-01
+      author: hasandag
+      changes:
+        - sql:
+            dbms: postgresql
+            sql: CREATE EXTENSION IF NOT EXISTS cube;
+        - sql:
+            dbms: postgresql
+            sql: CREATE EXTENSION IF NOT EXISTS earthdistance;
+      comment: Adding PostgreSQL extensions for geospatial queries (cube and earthdistance) 

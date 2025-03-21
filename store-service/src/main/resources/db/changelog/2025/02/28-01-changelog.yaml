@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: store-service-2025-02-28-03
+      author: hasandag
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: store_entries
+      changes:
+        - createTable:
+            tableName: store_entries
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: courier_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: store_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entry_time
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: courier_latitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+              - column:
+                  name: courier_longitude
+                  type: double precision
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: store_entries
+            baseColumnNames: store_id
+            referencedTableName: stores
+            referencedColumnNames: id
+            constraintName: fk_store_entries_store_id
+        - createIndex:
+            tableName: store_entries
+            indexName: idx_store_entry_courier_id
+            columns:
+              - column:
+                  name: courier_id
+        - createIndex:
+            tableName: store_entries
+            indexName: idx_store_entry_store_id
+            columns:
+              - column:
+                  name: store_id
+        - createIndex:
+            tableName: store_entries
+            indexName: idx_store_entry_timestamp
+            columns:
+              - column:
+                  name: entry_time

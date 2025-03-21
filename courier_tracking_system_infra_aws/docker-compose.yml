@@ -1,0 +1,227 @@
+services:
+  # Infrastructure Services
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${KAFKA_VERSION}
+    hostname: schema-registry
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-1:9092,EXTERNAL://localhost:19092
+      SCHEMA_REGISTRY_DEBUG: 'true'
+    networks:
+      - courier-tracking-system
+  kafka-broker-1:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    hostname: kafka-broker-1
+    ports:
+      - "19092:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: BROKER://kafka-broker-1:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://kafka-broker-1:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-broker-1:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_COMPRESSION_TYPE: producer
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-broker-1:9093,2@kafka-broker-2:9093,3@kafka-broker-3:9093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      KAFKA_LOG_SEGMENT_BYTES: 16384
+    volumes:
+      - ./check_cluster_id.sh:/tmp/check_cluster_id.sh
+      - ./cluster-id-dir:/tmp/cluster-id-dir
+      - ./volumes/kafka/broker-1:/tmp/kraft-logs
+    command: "bash -c '/tmp/check_cluster_id.sh && export CLUSTER_ID=$$(cat '/tmp/cluster-id-dir/clusterId') && /etc/confluent/docker/run'"
+    networks:
+      - courier-tracking-system
+  kafka-broker-2:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    hostname: kafka-broker-2
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: BROKER://kafka-broker-2:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://kafka-broker-2:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-broker-2:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_COMPRESSION_TYPE: producer
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-broker-1:9093,2@kafka-broker-2:9093,3@kafka-broker-3:9093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      KAFKA_LOG_SEGMENT_BYTES: 16384
+    volumes:
+      - ./check_cluster_id.sh:/tmp/check_cluster_id.sh
+      - ./cluster-id-dir:/tmp/cluster-id-dir
+      - ./volumes/kafka/broker-2:/tmp/kraft-logs
+    command: "bash -c '/tmp/check_cluster_id.sh && export CLUSTER_ID=$$(cat '/tmp/cluster-id-dir/clusterId') && /etc/confluent/docker/run'"
+    networks:
+      - courier-tracking-system
+  kafka-broker-3:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    hostname: kafka-broker-3
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENERS: BROKER://kafka-broker-3:9092,EXTERNAL://0.0.0.0:39092,CONTROLLER://kafka-broker-3:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-broker-3:9092,EXTERNAL://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_COMPRESSION_TYPE: producer
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-broker-1:9093,2@kafka-broker-2:9093,3@kafka-broker-3:9093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      KAFKA_LOG_SEGMENT_BYTES: 16384
+    volumes:
+      - ./check_cluster_id.sh:/tmp/check_cluster_id.sh
+      - ./cluster-id-dir:/tmp/cluster-id-dir
+      - ./volumes/kafka/broker-3:/tmp/kraft-logs
+    command: "bash -c '/tmp/check_cluster_id.sh && export CLUSTER_ID=$$(cat '/tmp/cluster-id-dir/clusterId') && /etc/confluent/docker/run'"
+    networks:
+      - courier-tracking-system
+  kafka-generator:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    hostname: kafka-generator
+    volumes:
+      - ./generate_cluster_id.sh:/tmp/generate_cluster_id.sh
+      - ./cluster-id-dir:/tmp/cluster-id-dir
+    command: "bash -c '/tmp/generate_cluster_id.sh'"
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9000:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+    networks:
+      - courier-tracking-system
+  init-kafka:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # block until kafka is reachable
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --list
+
+      echo -e 'Deleting kafka topics'
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --topic courier-locations --delete --if-exists
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic courier-locations --replication-factor 3 --partitions 6
+      
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --list
+      "
+    networks:
+      - courier-tracking-system
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - courier-tracking-system
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: courier_tracking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - courier-tracking-system
+
+  # Microservice Infrastructure
+  config-server:
+    build: ../config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - courier-tracking-system
+
+  api-gateway:
+    build: ../api-gateway
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=*
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    depends_on:
+      - config-server
+    networks:
+      - courier-tracking-system
+
+  # Application Services
+  store-service:
+    build: ../store-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server
+      - postgres
+      - schema-registry
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/courier_tracking
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    networks:
+      - courier-tracking-system
+
+  distance-calculation-service:
+    build: ../distance-calculation-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - config-server
+      - postgres
+      - schema-registry
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/courier_tracking
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    networks:
+      - courier-tracking-system
+
+  location-service:
+    build: ../location-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - config-server
+      - postgres
+      - schema-registry
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/courier_tracking
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+    networks:
+      - courier-tracking-system
+
+networks:
+  courier-tracking-system:
+volumes:
+  postgres-data:
