@@ -16,9 +16,7 @@ I went with a microservices approach to make the system scalable and easier to m
 - **Location Service**: Processes and stores courier locations
 - **Distance Calculation Service**: Tracks courier movements and calculates distances
 - **Store Service**: Handles store data and proximity detection
-- **Discovery Service**: Eureka server for service registration
 - **Config Server**: Centralized configuration management
-- **API Gateway**: Entry point for external API calls
 
 The services communicate both through REST APIs (using Feign clients) and asynchronously via Kafka events.
 
@@ -43,7 +41,6 @@ The services communicate both through REST APIs (using Feign clients) and asynch
 - Redis for caching
 - Kafka for event streaming
 - Resilience4j for circuit breaking
-- Spring Cloud Netflix for service discovery
 - Docker & Docker Compose for containerization
 - Maven for building
 - ELK Stack (Elasticsearch, Logstash, Kibana) for centralized logging
@@ -327,12 +324,10 @@ If you want more control or to run without Docker:
 mvn clean package
 
 # Start in this order:
-java -jar discovery-service/target/discovery-service.jar
 java -jar config-server/target/config-server.jar
 java -jar location-service/target/location-service.jar
 java -jar distance-calculation-service/target/distance-calculation-service.jar
 java -jar store-service/target/store-service.jar
-java -jar api-gateway/target/api-gateway.jar
 ```
 
 #### Option 3: Hybrid Setup (Advised if logs are wanted to be seen on console)
@@ -443,14 +438,6 @@ http://localhost:8084/actuator/prometheus
 http://localhost:8090/actuator/prometheus
 ```
 
-### Eureka Dashboard
-
-Monitor service registrations:
-
-```
-http://localhost:8761
-```
-
 ### Kafka UI
 
 Monitor Kafka topics and messages:
@@ -462,11 +449,6 @@ http://localhost:9000
 ## Troubleshooting
 
 ### Common Issues
-
-**Services can't connect to each other:**
-
-- Check if Eureka Server is running
-- Verify service registration in Eureka dashboard
 
 **Kafka related errors:**
 
